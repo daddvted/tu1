@@ -311,11 +311,11 @@ def get_flagged_names():
 
 
 ######
-# store path components of initial current working directory
+# store path tui of initial current working directory
 _initial_cwd = []
 
 def store_initial_cwd(name):
-    """Store the initial current working directory path components."""
+    """Store the initial current working directory path tui."""
 
     global _initial_cwd
     _initial_cwd = name.split(dir_sep())

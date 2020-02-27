@@ -7,7 +7,7 @@ The idea is that the server listens as an SSH server, and each connection is
 routed by Twisted to urwid, and the urwid UI is routed back to the console.
 The concept was a bit of a head-bender for me, but really we are just sending
 escape codes and the what-not back to the console over the shell that ssh has
-created. This is the same service as provided by the UI components in
+created. This is the same service as provided by the UI tui in
 twisted.conch.insults.window, except urwid has more features, and seems more
 mature.
 
