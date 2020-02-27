@@ -1,4 +1,5 @@
 import subprocess
+import asyncio
 import urwid
 
 
@@ -8,14 +9,33 @@ def show_or_exit(key):
 
 debug = urwid.Text('DEBUG')
 
-def update_text(read_data):
-    debug.set_text(f'retcode: {pipe.returncode}')
-    text.set_text(text.text + read_data.decode('utf-8'))
+async def update_text(read_data):
+    pass
+    # debug.set_text(f'retcode: {pipe.returncode}')
+    # text.set_text(text.text + read_data.decode('utf-8'))
 
 
 def enter_idle():
     loop.remove_watch_file(pipe.stdout)
 
+async def get_date(stdout, stderr):
+
+    # Create the subprocess; redirect the standard output
+    # into a pipe.
+    proc = await asyncio.create_subprocess_exec(
+        'python', '-u', 'job.py',
+        stdout=stdout,
+        stderr=stderr)
+
+    # Read one line of output.
+    # data = await proc.stdout.readline()
+    # line = data.decode('utf-8').rstrip()
+
+    # Wait for the subprocess exit.
+    # await proc.wait()
+    code = await proc.wait()
+    print(code)
+    # return line
 
 if __name__ == '__main__':
     widget = urwid.Pile([
@@ -31,7 +51,5 @@ if __name__ == '__main__':
     loop = urwid.MainLoop(widget, unhandled_input=show_or_exit)
     stdout = loop.watch_pipe(update_text)
     stderr = loop.watch_pipe(update_text)
-    pipe = subprocess.Popen('for i in $(seq 10); do echo -n "$i "; sleep 0.5; done',
-                            shell=True, stdout=stdout, stderr=stderr)
-    debug.set_text(f'{pipe.returncode}')
+    get_date(stdout, stderr)
     loop.run()
