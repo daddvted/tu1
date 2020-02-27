@@ -1,22 +1,37 @@
-import asyncio
-import sys
+import subprocess
+import urwid
 
-async def get_date():
-    code = 'import datetime; print(datetime.datetime.now())'
 
-    # Create the subprocess; redirect the standard output
-    # into a pipe.
-    proc = await asyncio.create_subprocess_exec(
-        sys.executable, '-c', code,
-        stdout=asyncio.subprocess.PIPE)
+def show_or_exit(key):
+    if key in ('q', 'Q', 'esc'):
+        raise urwid.ExitMainLoop()
 
-    # Read one line of output.
-    data = await proc.stdout.readline()
-    line = data.decode('ascii').rstrip()
+debug = urwid.Text('DEBUG')
 
-    # Wait for the subprocess exit.
-    await proc.wait()
-    return line
+def update_text(read_data):
+    debug.set_text(f'retcode: {pipe.returncode}')
+    text.set_text(text.text + read_data.decode('utf-8'))
 
-date = asyncio.run(get_date())
-print(f"Current date: {date}")
+
+def enter_idle():
+    loop.remove_watch_file(pipe.stdout)
+
+
+if __name__ == '__main__':
+    widget = urwid.Pile([
+        debug,
+        urwid.Button('And here another button'),
+        urwid.Button('One more, just to be sure'),
+        urwid.Button("Heck, let's add yet another one!"),
+    ])
+    text = urwid.Text('PROCESS OUTPUT:\n')
+    widget = urwid.Columns([widget, text])
+    widget = urwid.Filler(widget, 'top')
+
+    loop = urwid.MainLoop(widget, unhandled_input=show_or_exit)
+    stdout = loop.watch_pipe(update_text)
+    stderr = loop.watch_pipe(update_text)
+    pipe = subprocess.Popen('for i in $(seq 10); do echo -n "$i "; sleep 0.5; done',
+                            shell=True, stdout=stdout, stderr=stderr)
+    debug.set_text(f'{pipe.returncode}')
+    loop.run()

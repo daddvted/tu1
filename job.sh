@@ -1,9 +1,9 @@
 #!/bin/bash
 
-echo "sleep 5s"
+echo -e "sleep 5s\n"
 
 ls shit
 
 sleep 5
 
-echo "wake up"
+echo "wake up\n"

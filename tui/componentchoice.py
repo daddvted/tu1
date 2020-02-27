@@ -20,7 +20,7 @@ class ComponentChoice(urwid.WidgetWrap):
 
         install_btn = urwid.AttrWrap(urwid.Button('Install', on_press=self._handle_button_click) , 'button')
         install_btn = urwid.Padding(install_btn,
-                      width=('relative', 10), align='left', min_width=10)
+                      width=('relative', 10), align='left', min_width=12)
 
         content = [
             urwid.Divider(top=conf.DEFAULT_TOP_PADDING),
