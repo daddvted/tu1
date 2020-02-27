@@ -2,6 +2,7 @@ import urwid
 from tui.componentchoice import ComponentChoice
 from tui.uiwidgets import AppHeader, AppFooter, PopupDialog
 from tui.introview import IntroView
+from tui.progressview import ProgressView
 from tui.conf import palette
 
 
@@ -30,15 +31,17 @@ class SetupWizard:
         # self.header.debug.set_text('trigger install event')
 
         self.header.debug.set_text(','.join(self.current_content.components))
+        progress = ProgressView(self.current_content.components)
+        self.display_view(progress)
+
 
     def _handle_quit_event(self, widget, item):
         btn, = item
-        self.header.debug.set_text(f'{btn.label.lower()}')
         if btn.label.lower() == 'yes':
             self._quit()
         else:
             self.quitting = False
-            self.set_view(self.last_content)
+            self.display_view(self.last_content)
 
     def _quit(self):
         raise urwid.ExitMainLoop()
@@ -51,7 +54,7 @@ class SetupWizard:
                 package_choice = ComponentChoice()
                 urwid.connect_signal(package_choice, 'install_event', self._handle_install_event)
 
-                self.set_view(package_choice)
+                self.display_view(package_choice)
 
             elif k == "f4":
                 self.header.debug.set_text("you press F4")
@@ -60,13 +63,13 @@ class SetupWizard:
                 urwid.connect_signal(popup, 'quit_event', self._handle_quit_event)
                 popup.original_widget = self.current_content
                 popup.open()
-                self.set_view(popup)
+                self.display_view(popup)
 
             else:
                 return
         return True
 
-    def set_view(self, widget):
+    def display_view(self, widget):
         self.last_content = self.current_content
         self.current_content = widget
         view = urwid.Frame(self.current_content, header=self.header, footer=self.footer)
