@@ -9,10 +9,12 @@ class AppHeader(urwid.WidgetWrap):
 
     def __init__(self):
         self.debug = urwid.AttrWrap(urwid.Text('DEBUG'), 'debug')
+        self.debug2 = urwid.AttrWrap(urwid.Text('DEBUG2'), 'debug')
 
         widget_list = [
             urwid.AttrWrap(urwid.Text(self.header_text), 'header'),
             self.debug,
+            self.debug2,
         ]
         super().__init__(urwid.Columns(widget_list))
 
