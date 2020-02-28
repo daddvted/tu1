@@ -11,5 +11,11 @@ class ProgressView(urwid.WidgetWrap):
             job_bar = JobBar(job, "running")
             listbox_content.append(job_bar)
 
-        widget = urwid.ListBox(urwid.SimpleListWalker(listbox_content))
+
+        left = urwid.Pile(listbox_content)
+        self.output = urwid.Text('hehe')
+        # right = urwid.LineBox(self.output, title="Output")
+
+
+        widget = urwid.Filler(urwid.Columns([left, self.output]), valign='top')
         super().__init__(widget)

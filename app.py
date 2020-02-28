@@ -1,3 +1,4 @@
+import subprocess
 import urwid
 from tui.componentchoice import ComponentChoice
 from tui.uiwidgets import AppHeader, AppFooter, PopupDialog
@@ -16,6 +17,7 @@ class SetupWizard:
         self.palette = palette
 
         self.last_content = None
+        self.current_job = None
 
         self.header = AppHeader()
         self.footer = AppFooter()
@@ -33,6 +35,22 @@ class SetupWizard:
         self.header.debug.set_text(','.join(self.current_content.components))
         progress = ProgressView(self.current_content.components)
         self.display_view(progress)
+        self.current_content.output.set_text("shit")
+        self._run_job()
+
+    def _run_job(self):
+        write_fd = self.loop.watch_pipe(self._fill_output)
+        self.current_job = subprocess.Popen(
+            ['python', '-u', 'job.py'],
+            stdout=write_fd,
+            close_fds=True)
+
+
+
+    def _fill_output(self, data):
+        self.header.debug.set_text("{}".format(self.current_job.returncode))
+        current_text = self.current_content.output.text
+        self.current_content.output.set_text(current_text + data.decode('utf-8'))
 
 
     def _handle_quit_event(self, widget, item):

@@ -1,5 +1,7 @@
 import time
 
-print("sleep 5s")
-time.sleep(5)
+print("sleep 3s")
+time.sleep(3)
 print('wake up')
+
+exit(2)
