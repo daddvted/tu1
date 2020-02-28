@@ -18,6 +18,7 @@ class SetupWizard:
     def __init__(self):
         # Threading for invoke command/job
         self.stop_event = threading.Event()
+        self.lock = threading.Lock()
         self.mq = queue.Queue()
 
         self.palette = palette
@@ -35,19 +36,24 @@ class SetupWizard:
         self._print_output(self.loop, None)
 
     def _run_command(self, cmd, stop_event, msg_queue):
-        while not stop_event.wait(timeout=0.1):
-            proc = subprocess.Popen(
-                # ['python', '-u', 'job.py'],
-                # ['bash', 'job.sh'],
-                cmd,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.STDOUT,
-            )
-            while proc.poll() is None:
-                line = proc.stdout.readline().rstrip()
-                msg_queue.put(line)
-            msg_queue.put("Job Done, retcode: {}".format(proc.returncode))
-            break
+        self.lock.acquire()
+        # with self.lock:
+        try:
+            while not stop_event.wait(timeout=0.1):
+                proc = subprocess.Popen(
+                    # ['python', '-u', 'job.py'],
+                    # ['bash', 'job.sh'],
+                    cmd,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.STDOUT,
+                )
+                while proc.poll() is None:
+                    line = proc.stdout.readline().rstrip()
+                    msg_queue.put(line)
+                msg_queue.put("Job Done, retcode: {}".format(proc.returncode))
+                break
+        finally:
+            self.lock.release()
 
     def _print_output(self, loop, *_args):
         """add message to bottom of screen"""
