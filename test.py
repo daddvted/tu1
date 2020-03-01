@@ -5,9 +5,10 @@ COMPONENTS = [
     ('luna', 'Luna Platform')
 ]
 
-od = OrderedDict(COMPONENTS)
+od = OrderedDict()
+for k, v in COMPONENTS:
+    od[k] = v
 
-for k, v in od.items():
-    print(f"{k} --- {v}")
+print(list(od.values()))
 
 

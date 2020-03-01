@@ -1,4 +1,5 @@
-palette = [
+from collections import OrderedDict
+PALETTE = [
     ('header', 'white', 'dark green', 'bold'),
     ('body', 'default', 'default'),
     ('footer', 'default', 'dark blue'),
@@ -13,15 +14,31 @@ palette = [
     ('debug', 'white', 'dark blue', 'bold'),
 ]
 
-COMPONENTS = [
-    ('basic', 'Basic Environment(Docker, Python)'),
-    ('xledger', 'xLedger Platform'),
-    ('luna', 'Luna Platform')
-]
-
 DEFAULT_WIDTH_PERCENTAGE = 80
 DEFAULT_TOP_PADDING = 6
 
 POPUP_BTN_WIDTH = 8
 POPUP_WIDTH = 30
 POPUP_HEIGHT = 6
+
+component_tuple = [
+]
+
+ORDER = {
+    'basic': 0,
+    'xledger': 1,
+    'luna': 2
+}
+
+COMPONENTS = {
+    'basic': 'Basic Environment(Docker, Python)',
+    'xledger': 'xLedger Platform',
+    'luna': 'Luna Platform',
+}
+
+JOB_COMMAND = {
+    'basic': ['python', '-u', 'job.py'],
+    'luna': ['bash', 'job.sh'],
+    'xledger': ['bash', 'job2.sh']
+}
+

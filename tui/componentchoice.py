@@ -1,4 +1,3 @@
-from collections import OrderedDict
 import urwid
 from tui import conf
 
@@ -13,15 +12,10 @@ class ComponentChoice(urwid.WidgetWrap):
 
         # To use 'user_data', set 'on_state_change'
         checkboxes = []
-        for key, title in OrderedDict(conf.COMPONENTS).items():
+        for key, title in conf.COMPONENTS.items():
             checkboxes.append(
                 urwid.CheckBox(title, on_state_change=self._handle_checkbox_change, user_data=key)
             )
-        # checkboxes = [
-        #     urwid.CheckBox("Basic Environment(Docker, Python)", on_state_change=self._handle_checkbox_change, user_data='basic'),
-        #     urwid.CheckBox("xLedger Platform", on_state_change=self._handle_checkbox_change, user_data='xledger'),
-        #     urwid.CheckBox("Luna Platform", on_state_change=self._handle_checkbox_change, user_data="luna"),
-        # ]
         choice = urwid.Pile(checkboxes)
 
         wrapped_btn = urwid.AttrWrap(urwid.Button('Install', on_press=self._handle_button_click), 'button')
@@ -58,7 +52,6 @@ class ComponentChoice(urwid.WidgetWrap):
             self._emit('install_event', args)
         else:
             self.warning.set_text('Choose component to install')
-
 
     @property
     def components(self):

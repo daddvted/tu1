@@ -1,5 +1,6 @@
-import threading
 import queue
+import logging
+import threading
 import subprocess
 
 import urwid
@@ -7,7 +8,28 @@ from tui.componentchoice import ComponentChoice
 from tui.uiwidgets import AppHeader, AppFooter, PopupDialog
 from tui.introview import IntroView
 from tui.progressview import ProgressView
-from tui.conf import palette
+from tui import conf
+
+logging.basicConfig(
+    level=logging.DEBUG,
+    format="%(asctime)-4s %(threadName)s %(message)s",
+    datefmt="%H:%M:%S",
+    filename='trace.log',
+)
+
+
+def order_jobs(jobs: list) -> list:
+    logging.debug('input jobs: {}'.format(jobs))
+
+    tmp = []
+    for job in jobs:
+        tmp.append((job, conf.ORDER[job]))
+    tmp.sort(key=lambda x: x[1])
+
+    ordered_jobs = [x[0] for x in tmp]
+    logging.debug('output jobs: {}'.format(ordered_jobs))
+    return ordered_jobs
+
 
 
 class SetupWizard:
@@ -21,15 +43,16 @@ class SetupWizard:
         self.lock = threading.Lock()
         self.mq = queue.Queue()
 
-        self.palette = palette
-
+        self.palette = conf.PALETTE
         self.last_content = None
         self.current_job = None
+        self.jobs = []
 
         self.header = AppHeader()
         self.footer = AppFooter()
 
         self.current_content = IntroView()
+        self.progress_view = None
 
         view = urwid.Frame(self.current_content, header=self.header, footer=self.footer)
         self.loop = urwid.MainLoop(view, self.palette, unhandled_input=self._unhandled_control)
@@ -38,6 +61,7 @@ class SetupWizard:
     def _run_command(self, cmd, stop_event, msg_queue):
         # Run only one thread
         self.lock.acquire()
+        self.header.debug2.set_text("current job: {}".format(threading.current_thread()))
 
         # with self.lock:
         try:
@@ -74,31 +98,32 @@ class SetupWizard:
             return
 
         # Current content should be ProgressView()
-        self.current_content.console.append(
+        self.progress_view.console.append(
             urwid.Text(('body', msg))
-            )
-        self.current_content.output.set_focus(
-            len(self.current_content.console)-1, 'above'
-            )
+        )
+        self.progress_view.output.set_focus(
+            len(self.progress_view.console) - 1, 'above'
+        )
 
     def _handle_install_event(self, *args):
         # self.header.debug.set_text('trigger install event')
 
         self.header.debug.set_text(','.join(self.current_content.components))
-        progress = ProgressView(self.current_content.components)
-        for cmd in [
-            ['python', '-u', 'job.py'],
-            ['bash', 'job.sh'],
-        ]:
+        self.jobs = order_jobs(self.current_content.components)
+
+        self.progress_view = ProgressView(self.jobs)
+
+        self.display_view(self.progress_view)
+
+        for job in self.jobs:
             minion = threading.Thread(
                 target=self._run_command,
-                args=(cmd, self.stop_event, self.mq),
-                name='Minion'
+                args=(conf.JOB_COMMAND[job], self.stop_event, self.mq),
+                name=job
             )
             minion.start()
-            self.header.debug2.set_text("{}".format(self.stop_event.is_set()))
-
-        self.display_view(progress)
+            self.progress_view.job_bars[job].status = 'Installing'
+            self.header.debug2.set_text("current job: {}".format(threading.current_thread()))
 
     def _handle_quit_event(self, widget, item):
         btn, = item

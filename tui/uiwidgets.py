@@ -62,12 +62,16 @@ class JobBar(urwid.WidgetWrap):
     def __init__(self, text, status):
         self._text = text
         self._status = status
-        widget = urwid.Text(self._format_text())
+        # widget = urwid.Text(self._format_text())
+        self._title_component = urwid.Text(self._text)
+        self._status_component = urwid.Text(self._status)
+
+        widget = urwid.Columns([
+            self._title_component,
+            self._status_component
+        ])
 
         super().__init__(widget)
-
-    def _format_text(self):
-        return [self._text, ('title', self._status)]
 
     @property
     def text(self):
@@ -84,3 +88,5 @@ class JobBar(urwid.WidgetWrap):
     @status.setter
     def status(self, status):
         self._status = status
+        self._status_component.set_text(status)
+

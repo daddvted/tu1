@@ -1,5 +1,7 @@
+from collections import OrderedDict
 import urwid
 from tui.uiwidgets import JobBar
+from tui import conf
 
 
 class ProgressView(urwid.WidgetWrap):
@@ -9,14 +11,22 @@ class ProgressView(urwid.WidgetWrap):
         self.console = urwid.SimpleListWalker([])
         self.output = urwid.ListBox(self.console)
 
-        listbox_content = []
-        for job in self._jobs:
-            job_bar = JobBar(job, "running")
-            listbox_content.append(job_bar)
+        self.job_bars = OrderedDict()
+        for key in self._jobs:
+            self.job_bars[key] = JobBar(conf.COMPONENTS[key], "Waiting")
 
-        left_widget = urwid.ListBox(urwid.SimpleListWalker(listbox_content))
+        left_widget = urwid.ListBox(
+            urwid.SimpleListWalker(
+                list(self.job_bars.values())
+            )
+        )
         right_widget = urwid.LineBox(self.output)
 
         # widget = self.output
         widget = urwid.Columns([left_widget, right_widget])
         super().__init__(widget)
+
+    def set_job_status(self, job: str, status: str):
+        self.job_bars[job].status = status
+
+
