@@ -36,7 +36,7 @@ class PopupDialog(urwid.WidgetPlaceholder):
     def __init__(self):
         super().__init__(urwid.SolidFill(' '))
         content = [
-            urwid.Text(("error", "Quit Setup Wizard ?")),
+            urwid.Text(("warning", "Quit Setup Wizard ?")),
             urwid.Divider(),
             urwid.Columns([
                 urwid.Padding(urwid.AttrWrap(urwid.Button('Yes', on_press=self._emit_quit_event), 'button'),

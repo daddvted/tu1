@@ -1,7 +1,7 @@
 #!/bin/bash
 
 echo "setting up xledger"
-echo "sleep 1s"
+sleep 3s
 
 echo "done"
 

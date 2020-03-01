@@ -26,7 +26,8 @@ class ProgressView(urwid.WidgetWrap):
         widget = urwid.Columns([left_widget, right_widget])
         super().__init__(widget)
 
-    def set_job_status(self, job: str, status: str):
-        self.job_bars[job].status = status
+    def set_job_status(self, job: str, status: str, color: str):
+        text = (color, status)
+        self.job_bars[job].status = text
 
 

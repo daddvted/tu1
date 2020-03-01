@@ -58,10 +58,13 @@ class SetupWizard:
         self.loop = urwid.MainLoop(view, self.palette, unhandled_input=self._unhandled_control)
         self._print_output(self.loop, None)
 
-    def _run_command(self, cmd, stop_event, msg_queue):
+    def _run_command(self, cmd, stop_event, msg_queue, job):
+        retry = 1
         # Run only one thread
         self.lock.acquire()
-        self.header.debug2.set_text("current job: {}".format(threading.current_thread()))
+        self.header.debug2.set_text("current job: {}".format(job))
+
+        self.progress_view.set_job_status(job, 'Installing', 'warning')
 
         # with self.lock:
         try:
@@ -77,7 +80,17 @@ class SetupWizard:
                     line = proc.stdout.readline().rstrip()
                     msg_queue.put(line)
                 msg_queue.put("Job Done, retcode: {}".format(proc.returncode))
-                break
+                if proc.returncode == 0:
+                    self.progress_view.set_job_status(job, 'Success', 'success')
+                    break
+                else:
+                    if retry < conf.RETRY_NUM:
+                        self.progress_view.set_job_status(job, 'Retry (No.{})'.format(retry), 'warning')
+                    else:
+                        self.progress_view.set_job_status(job, 'FAILED', 'error')
+                        import sys
+                        sys.exit()
+                retry += 1
         finally:
             # When job succeeded, release lock to run next thread
             self.lock.release()
@@ -118,12 +131,11 @@ class SetupWizard:
         for job in self.jobs:
             minion = threading.Thread(
                 target=self._run_command,
-                args=(conf.JOB_COMMAND[job], self.stop_event, self.mq),
+                args=(conf.JOB_COMMAND[job], self.stop_event, self.mq, job),
                 name=job
             )
             minion.start()
-            self.progress_view.job_bars[job].status = 'Installing'
-            self.header.debug2.set_text("current job: {}".format(threading.current_thread()))
+            # self.header.debug2.set_text("current job: {}".format(threading.current_thread()))
 
     def _handle_quit_event(self, widget, item):
         btn, = item

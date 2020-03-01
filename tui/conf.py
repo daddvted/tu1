@@ -21,8 +21,6 @@ POPUP_BTN_WIDTH = 8
 POPUP_WIDTH = 30
 POPUP_HEIGHT = 6
 
-component_tuple = [
-]
 
 ORDER = {
     'basic': 0,
@@ -41,4 +39,5 @@ JOB_COMMAND = {
     'luna': ['bash', 'job.sh'],
     'xledger': ['bash', 'job2.sh']
 }
+RETRY_NUM = 3
 
