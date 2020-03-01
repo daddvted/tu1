@@ -1,3 +1,4 @@
+from collections import OrderedDict
 import urwid
 from tui import conf
 
@@ -11,16 +12,20 @@ class ComponentChoice(urwid.WidgetWrap):
         self._components = []
 
         # To use 'user_data', set 'on_state_change'
-        checkboxes = [
-            urwid.CheckBox("Basic Environment(Docker, Python)", on_state_change=self._handle_checkbox_change, user_data='basic'),
-            urwid.CheckBox("xLedger Platform", on_state_change=self._handle_checkbox_change, user_data='xledger'),
-            urwid.CheckBox("Luna Platform", on_state_change=self._handle_checkbox_change, user_data="luna"),
-        ]
+        checkboxes = []
+        for key, title in OrderedDict(conf.COMPONENTS).items():
+            checkboxes.append(
+                urwid.CheckBox(title, on_state_change=self._handle_checkbox_change, user_data=key)
+            )
+        # checkboxes = [
+        #     urwid.CheckBox("Basic Environment(Docker, Python)", on_state_change=self._handle_checkbox_change, user_data='basic'),
+        #     urwid.CheckBox("xLedger Platform", on_state_change=self._handle_checkbox_change, user_data='xledger'),
+        #     urwid.CheckBox("Luna Platform", on_state_change=self._handle_checkbox_change, user_data="luna"),
+        # ]
         choice = urwid.Pile(checkboxes)
 
-        install_btn = urwid.AttrWrap(urwid.Button('Install', on_press=self._handle_button_click) , 'button')
-        install_btn = urwid.Padding(install_btn,
-                      width=('relative', 10), align='left', min_width=12)
+        wrapped_btn = urwid.AttrWrap(urwid.Button('Install', on_press=self._handle_button_click), 'button')
+        install_btn = urwid.Padding(wrapped_btn, width=('relative', 10), align='left', min_width=12)
 
         content = [
             urwid.Divider(top=conf.DEFAULT_TOP_PADDING),

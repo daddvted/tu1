@@ -36,7 +36,9 @@ class SetupWizard:
         self._print_output(self.loop, None)
 
     def _run_command(self, cmd, stop_event, msg_queue):
+        # Run only one thread
         self.lock.acquire()
+
         # with self.lock:
         try:
             while not stop_event.wait(timeout=0.1):
@@ -53,6 +55,7 @@ class SetupWizard:
                 msg_queue.put("Job Done, retcode: {}".format(proc.returncode))
                 break
         finally:
+            # When job succeeded, release lock to run next thread
             self.lock.release()
 
     def _print_output(self, loop, *_args):
@@ -71,11 +74,11 @@ class SetupWizard:
             return
 
         # Current content should be ProgressView()
-        self.current_content.flow_walker.append(
+        self.current_content.console.append(
             urwid.Text(('body', msg))
             )
         self.current_content.output.set_focus(
-            len(self.current_content.flow_walker)-1, 'above'
+            len(self.current_content.console)-1, 'above'
             )
 
     def _handle_install_event(self, *args):
@@ -105,17 +108,19 @@ class SetupWizard:
             self.quitting = False
             self.display_view(self.last_content)
 
-    def _unhandled_control(self, k):
+    def _unhandled_control(self, key):
+        self.header.debug.set_text('{}'.format(key))
+
         """Last resort for keypresses."""
         if not self.quitting:
-            if k == "f2":
+            if key == "f2":
                 self.header.debug.set_text("you press F2")
-                package_choice = ComponentChoice()
-                urwid.connect_signal(package_choice, 'install_event', self._handle_install_event)
+                component_choice = ComponentChoice()
+                urwid.connect_signal(component_choice, 'install_event', self._handle_install_event)
 
-                self.display_view(package_choice)
+                self.display_view(component_choice)
 
-            elif k == "f4":
+            elif key == "f4":
                 self.header.debug.set_text("you press F4")
                 self.quitting = True
                 popup = PopupDialog()
@@ -133,9 +138,6 @@ class SetupWizard:
         self.current_content = widget
         view = urwid.Frame(self.current_content, header=self.header, footer=self.footer)
         self.loop.widget = view
-
-    # def main(self):
-    #     self.loop.run()
 
 
 if __name__ == '__main__':

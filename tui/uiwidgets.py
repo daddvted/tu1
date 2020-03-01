@@ -39,8 +39,10 @@ class PopupDialog(urwid.WidgetPlaceholder):
             urwid.Text(("error", "Quit Setup Wizard ?")),
             urwid.Divider(),
             urwid.Columns([
-                urwid.Padding(urwid.AttrWrap(urwid.Button('Yes', on_press=self._emit_quit_event), 'button'), width=8),
-                urwid.Padding(urwid.AttrWrap(urwid.Button('No', on_press=self._emit_quit_event), 'button'), width=8),
+                urwid.Padding(urwid.AttrWrap(urwid.Button('Yes', on_press=self._emit_quit_event), 'button'),
+                              min_width=conf.POPUP_BTN_WIDTH, right=1),
+                urwid.Padding(urwid.AttrWrap(urwid.Button('No', on_press=self._emit_quit_event), 'button'),
+                              min_width=conf.POPUP_BTN_WIDTH, left=1),
             ])
         ]
         tmp = urwid.ListBox(urwid.SimpleListWalker(content))
