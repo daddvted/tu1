@@ -9,8 +9,9 @@ print("sleep 2s")
 time.sleep(2)
 print('wake up')
 print('print numbers:')
-for i in range(30):
+for i in range(10):
     print(i)
     time.sleep(0.1)
 
-exit(random.choice(ret_code))
+exit(2)
+# exit(random.choice(ret_code))

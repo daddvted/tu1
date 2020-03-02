@@ -60,6 +60,7 @@ class SetupWizard:
 
     def _run_command(self, cmd, stop_event, msg_queue, job):
         retry = 1
+        previous_status = ''
         # Run only one thread
         self.lock.acquire()
         self.header.debug2.set_text("current job: {}".format(job))
@@ -69,17 +70,18 @@ class SetupWizard:
         # with self.lock:
         try:
             while not stop_event.wait(timeout=0.1):
+                logging.debug('here shit')
                 proc = subprocess.Popen(
-                    # ['python', '-u', 'job.py'],
-                    # ['bash', 'job.sh'],
                     cmd,
                     stdout=subprocess.PIPE,
                     stderr=subprocess.STDOUT,
                 )
                 while proc.poll() is None:
                     line = proc.stdout.readline().rstrip()
-                    msg_queue.put(line)
+                    if line:
+                        msg_queue.put(line)
                 msg_queue.put("Job Done, retcode: {}".format(proc.returncode))
+
                 if proc.returncode == 0:
                     self.progress_view.set_job_status(job, 'Success', 'success')
                     break
@@ -88,10 +90,20 @@ class SetupWizard:
                         self.progress_view.set_job_status(job, 'Retry (No.{})'.format(retry), 'warning')
                     else:
                         self.progress_view.set_job_status(job, 'FAILED', 'error')
-                        import sys
-                        sys.exit()
+                        previous_status = 'failed'
+                        break
                 retry += 1
         finally:
+            if previous_status == 'failed':
+                logging.debug('{}'.format(threading.enumerate()))
+                # threading.enumerate().remove(threading.main_thread())
+                import sys
+                sys.exit()
+
+                # for th in threading.enumerate():
+                #     if th != threading.current_thread():
+                #         th.join()
+
             # When job succeeded, release lock to run next thread
             self.lock.release()
 
@@ -102,9 +114,10 @@ class SetupWizard:
             callback=self._print_output,
         )
         # self.footer.set_text(self.msg_queue.get_nowait())
-        self.header.debug.set_text('{}'.format(threading.active_count()))
+        self.header.debug.set_text('{}'.format(self.mq.qsize()))
         try:
             msg = self.mq.get_nowait()
+            self.header.debug2.set_text('{}'.format(msg))
         except queue.Empty:
             # Debug
             self.header.debug.set_text('queue empty')
@@ -184,6 +197,7 @@ if __name__ == '__main__':
     wizard.loop.run()
 
     wizard.stop_event.set()
+    wizard.lock.release()
     for th in threading.enumerate():
         if th != threading.current_thread():
             th.join()
