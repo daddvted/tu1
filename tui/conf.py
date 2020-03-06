@@ -1,4 +1,11 @@
 from collections import OrderedDict
+
+HEADER_TEXT = "XXXXX Offline Setup Wizard"
+FOOTER_TEXT = [
+    " Continue", ('key', " F2 "),
+    "    Quit", ('key', " F4 "),
+]
+
 PALETTE = [
     ('header', 'white', 'dark green', 'bold'),
     ('body', 'default', 'default'),
@@ -12,6 +19,9 @@ PALETTE = [
     ('success', 'light green', 'default', 'standout'),
     ('bright', 'dark gray', 'light gray', ('bold', 'standout')),
     ('debug', 'white', 'dark blue', 'bold'),
+    ('success_bg', 'white', 'dark green', 'bold'),
+    ('warning_bg', 'white', 'yellow', 'bold'),
+    ('error_bg', 'white', 'dark red', 'bold'),
 ]
 
 DEFAULT_WIDTH_PERCENTAGE = 80

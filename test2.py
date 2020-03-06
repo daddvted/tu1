@@ -1,22 +1,30 @@
-import asyncio
-import sys
+import urwid
 
-async def get_date():
-    # code = 'import datetime; print(datetime.datetime.now())'
 
-    # Create the subprocess; redirect the standard output
-    # into a pipe.
-    proc = await asyncio.create_subprocess_exec(
-        'python', '-u', 'job.py',
-        stdout=asyncio.subprocess.PIPE)
+lists = [
+    urwid.Text('apple'),
+    urwid.Text('banana'),
+    urwid.Text('pear')
+]
 
-    # Read one line of output.
-    data = await proc.stdout.readline()
-    line = data.decode('ascii').rstrip()
+lists = [
+    urwid.CheckBox('apple'),
+    urwid.CheckBox('banana'),
+    urwid.CheckBox('pear')
+]
 
-    # Wait for the subprocess exit.
-    await proc.wait()
-    return line
+# left = urwid.ListBox(urwid.SimpleListWalker(lists))
+left = urwid.Pile(lists)
 
-date = asyncio.run(get_date())
-print("Current date: {}".format(date))
+
+right = urwid.Text(u"Hello World")
+right = urwid.LineBox(right)
+
+
+widgets = urwid.Columns([left, right])
+
+content = urwid.Filler(widgets, valign='middle')
+
+frame = urwid.Frame(body=content)
+loop = urwid.MainLoop(frame)
+loop.run()

@@ -9,20 +9,18 @@ class ProgressView(urwid.WidgetWrap):
         self._jobs = jobs
 
         self.console = urwid.SimpleListWalker([])
-        self.output = urwid.ListBox(self.console)
+        self.console_box = urwid.ListBox(self.console)
 
         self.job_bars = OrderedDict()
         for key in self._jobs:
             self.job_bars[key] = JobBar(conf.COMPONENTS[key], "Waiting")
 
-        left_widget = urwid.ListBox(
-            urwid.SimpleListWalker(
-                list(self.job_bars.values())
-            )
-        )
-        right_widget = urwid.LineBox(self.output)
+        left_widget = urwid.Filler(urwid.Pile(self.job_bars.values()), valign='middle')
+
+        right_widget = urwid.LineBox(self.console_box)
 
         # widget = self.output
+        # widget = urwid.Columns([left_widget, right_widget])
         widget = urwid.Columns([left_widget, right_widget])
         super().__init__(widget)
 

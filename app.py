@@ -83,13 +83,13 @@ class SetupWizard:
                 msg_queue.put("Job Done, retcode: {}".format(proc.returncode))
 
                 if proc.returncode == 0:
-                    self.progress_view.set_job_status(job, 'Success', 'success')
+                    self.progress_view.set_job_status(job, 'Success', 'success_bg')
                     break
                 else:
                     if retry < conf.RETRY_NUM:
                         self.progress_view.set_job_status(job, 'Retry (No.{})'.format(retry), 'warning')
                     else:
-                        self.progress_view.set_job_status(job, 'FAILED', 'error')
+                        self.progress_view.set_job_status(job, 'FAILED', 'error_bg')
                         previous_status = 'failed'
                         break
                 retry += 1
@@ -105,7 +105,8 @@ class SetupWizard:
                 #         th.join()
 
             # When job succeeded, release lock to run next thread
-            self.lock.release()
+            if self.lock.locked():
+                self.lock.release()
 
     def _print_output(self, loop, *_args):
         """add message to bottom of screen"""
@@ -117,17 +118,17 @@ class SetupWizard:
         self.header.debug.set_text('{}'.format(self.mq.qsize()))
         try:
             msg = self.mq.get_nowait()
-            self.header.debug2.set_text('{}'.format(msg))
+            # self.header.debug2.set_text('{}'.format(msg))
         except queue.Empty:
             # Debug
-            self.header.debug.set_text('queue empty')
+            # self.header.debug.set_text('queue empty')
             return
 
         # Current content should be ProgressView()
         self.progress_view.console.append(
             urwid.Text(('body', msg))
         )
-        self.progress_view.output.set_focus(
+        self.progress_view.console_box.set_focus(
             len(self.progress_view.console) - 1, 'above'
         )
 
@@ -197,7 +198,11 @@ if __name__ == '__main__':
     wizard.loop.run()
 
     wizard.stop_event.set()
-    wizard.lock.release()
-    for th in threading.enumerate():
-        if th != threading.current_thread():
-            th.join()
+
+    try:
+        wizard.lock.release()
+        for th in threading.enumerate():
+            if th != threading.current_thread():
+                th.join()
+    except RuntimeError:
+        pass

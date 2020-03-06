@@ -3,9 +3,7 @@ from tui import conf
 
 
 class AppHeader(urwid.WidgetWrap):
-    header_text = ('header', [
-        "XXXXX Offline Setup Wizard",
-    ])
+    header_text = ('header',  conf.HEADER_TEXT)
 
     def __init__(self):
         self.debug = urwid.AttrWrap(urwid.Text('DEBUG'), 'debug')
@@ -20,10 +18,7 @@ class AppHeader(urwid.WidgetWrap):
 
 
 class AppFooter(urwid.WidgetWrap):
-    footer_text = ('footer', [
-        " Continue", ('key', " F2 "),
-        "    Quit", ('key', " F4 "),
-    ])
+    footer_text = ('footer', conf.FOOTER_TEXT)
 
     def __init__(self):
         widget = urwid.AttrWrap(urwid.Text(self.footer_text), 'footer')
@@ -64,11 +59,16 @@ class JobBar(urwid.WidgetWrap):
         self._status = status
         # widget = urwid.Text(self._format_text())
         self._title_component = urwid.Text(self._text)
+        # self._status_component = urwid.AttrWrap(urwid.Text(self._status), 'background')
         self._status_component = urwid.Text(self._status)
 
-        widget = urwid.Columns([
-            self._title_component,
-            self._status_component
+        bar = urwid.Columns([
+            urwid.Padding(self._title_component, width=('relative', 80), align='right'),
+            urwid.Padding(self._status_component, width=16, align='left')
+        ])
+        widget = urwid.Pile([
+            bar,
+            urwid.Divider()
         ])
 
         super().__init__(widget)

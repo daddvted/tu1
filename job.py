@@ -13,5 +13,4 @@ for i in range(10):
     print(i)
     time.sleep(0.1)
 
-exit(2)
-# exit(random.choice(ret_code))
+exit(random.choice(ret_code))
