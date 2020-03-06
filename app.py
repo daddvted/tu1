@@ -135,21 +135,22 @@ class SetupWizard:
     def _handle_install_event(self, *args):
         # self.header.debug.set_text('trigger install event')
 
-        self.header.debug.set_text(','.join(self.current_content.components))
-        self.jobs = order_jobs(self.current_content.components)
-
-        self.progress_view = ProgressView(self.jobs)
-
-        self.display_view(self.progress_view)
-
-        for job in self.jobs:
-            minion = threading.Thread(
-                target=self._run_command,
-                args=(conf.JOB_COMMAND[job], self.stop_event, self.mq, job),
-                name=job
-            )
-            minion.start()
-            # self.header.debug2.set_text("current job: {}".format(threading.current_thread()))
+        self.header.debug2.set_text('{}'.format(args))
+        # self.header.debug2.set_text(self.current_content.component)
+        # self.jobs = order_jobs(self.current_content.components)
+        #
+        # self.progress_view = ProgressView(self.jobs)
+        #
+        # self.display_view(self.progress_view)
+        #
+        # for job in self.jobs:
+        #     minion = threading.Thread(
+        #         target=self._run_command,
+        #         args=(conf.JOB_COMMAND[job], self.stop_event, self.mq, job),
+        #         name=job
+        #     )
+        #     minion.start()
+        #     # self.header.debug2.set_text("current job: {}".format(threading.current_thread()))
 
     def _handle_quit_event(self, widget, item):
         btn, = item

@@ -39,9 +39,10 @@ ORDER = {
 }
 
 COMPONENTS = {
-    'basic': 'Basic Environment(Docker, Python)',
-    'xledger': 'xLedger Platform',
-    'luna': 'Luna Platform',
+    'basic': 'Install Basic Environment(Docker, Python)',
+    'swarm': 'Initialize Docker Swarm',
+    'xledger': 'Install XLedger Platform',
+    'luna': 'Install Luna Platform',
 }
 
 JOB_COMMAND = {
